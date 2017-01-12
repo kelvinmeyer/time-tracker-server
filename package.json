@@ -1,0 +1,25 @@
+{
+  "name": "time-tracker-server",
+  "version": "1.0.0",
+  "description": "the server for my time tracking application",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kelvinmeyer/time-tracker-server.git"
+  },
+  "author": "hobbes",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kelvinmeyer/time-tracker-server/issues"
+  },
+  "homepage": "https://github.com/kelvinmeyer/time-tracker-server#readme",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
+    "express-basic-auth": "^0.2.3",
+    "sqlite3": "^3.1.8"
+  }
+}
