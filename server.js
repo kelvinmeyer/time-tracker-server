@@ -1,7 +1,12 @@
 //Imports
 //sql database
 var sqlite3 = require('sqlite3').verbose();
-var db = new sqlite3.Database('timeTrackV0.db');
+if(process.env.depsat == 'test'){
+  var db = new sqlite3.Database('timeTrackV0Test.db');
+}else{
+  var db = new sqlite3.Database('timeTrackV0.db');
+}
+var logging = process.argv[3];
 
 //express framework
 var express = require('express');
@@ -42,7 +47,7 @@ function setup(){
       });
   });
   app.listen(3000, function(){
-    console.log('listening on port 3000');
+    if(logging){console.log('listening on port 3000')};
   });
 }
 
@@ -105,7 +110,7 @@ function myAuthorizer(username, password, callback) {
 
 // function to return if user is not in db
 function badAuth(req){
-  console.log('BAD authentication');
+  if(logging){console.log('BAD authentication')};
   //TODO should return json with error and details
   return req.auth ? ('Credentials ' + req.auth.user + ':' + req.auth.password + ' rejected') : 'No credentials provided';
 }
@@ -115,6 +120,7 @@ function badAuth(req){
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 app.post('/v1/login', function(req, res){
+  if(logging){console.log('Login request')};
   myAuthorizer(req.body.Username, req.body.Password, function(err, val){
     if(val){
       res.status(200).send({'login': 'success', 'User': req.body.Username});
@@ -133,7 +139,7 @@ app.use(basicAuth({
 
 //post fnctions
 app.post('/v1/users', function(req, res){
-  console.log(req.method+' request on '+req.originalUrl);
+  if(logging){console.log(req.method+' request on '+req.originalUrl)};
   db.serialize(function() {
     db.run("INSERT INTO Users VALUES (?, ?, ?)", [req.body.Username, req.body.Password, req.body.Name], function(){
       res.set('Location', '/v1/users/'+req.body.Username);
@@ -143,7 +149,7 @@ app.post('/v1/users', function(req, res){
 });
 
 app.post('/v1/clients', function(req, res){
-  console.log(req.method+' request on '+req.originalUrl);
+  if(logging){console.log(req.method+' request on '+req.originalUrl)};
   db.serialize(function() {
     db.run("INSERT INTO Clients VALUES (?, ?)", [req.body.JobID, req.body.Title, ], function(){
       res.set('Location', '/v1/clients/'+req.body.ClientID);
@@ -153,7 +159,7 @@ app.post('/v1/clients', function(req, res){
 });
 
 app.post('/v1/jobs', function(req, res){
-  console.log(req.method+' request on '+req.originalUrl);
+  if(logging){console.log(req.method+' request on '+req.originalUrl)};
   db.serialize(function() {
     db.run("INSERT INTO Jobs VALUES (?, ?, ?, ?, ?, ?, ?)", [req.body.JobID, req.body.Title, req.body.Client, req.body.Status, req.body.StartDate, req.body.Description, req.body.InvNum], function(){
       res.set('Location', '/v1/jobs/'+req.body.JobID);
@@ -163,7 +169,7 @@ app.post('/v1/jobs', function(req, res){
 });
 
 app.post('/v1/Activities', function(req, res){
-  console.log(req.method+' request on '+req.originalUrl);
+  if(logging){console.log(req.method+' request on '+req.originalUrl)};
   db.serialize(function() {
     db.run("INSERT INTO Jobs VALUES (?, ?, ?, ?, ?, ?, ?)", [req.body.ActivityID, req.body.Job, req.body.User, req.body.StartTime, req.body.EndTime, req.body.Time, req.body.Comment], function(){
       res.set('Location', '/v1/activities/'+req.body.ActivityID);
@@ -175,7 +181,7 @@ app.post('/v1/Activities', function(req, res){
 
 //get functions
 app.get('/v1/users', function(req, res){
-  console.log(req.method+' request on '+req.originalUrl);
+  if(logging){console.log(req.method+' request on '+req.originalUrl)};
   db.serialize(function(){
     db.all("SELECT Username, Name FROM Users", function (err, rows) {
       //TODO the error part
@@ -188,7 +194,7 @@ app.get('/v1/users', function(req, res){
 });
 
 app.get('/v1/users/:username', function(req, res){
-  console.log(req.method+' request on '+req.originalUrl);
+  if(logging){console.log(req.method+' request on '+req.originalUrl)};
   db.serialize(function(){
     db.get("SELECT Username, Name FROM Users WHERE Username=?",[req.params.username], function (err, row) {
       //TODO the error part
@@ -201,7 +207,7 @@ app.get('/v1/users/:username', function(req, res){
 });
 
 app.get('/v1/clients', function(req, res){
-  console.log(req.method+' request on '+req.originalUrl);
+  if(logging){console.log(req.method+' request on '+req.originalUrl)};
   db.serialize(function(){
     db.all("SELECT * FROM Clients", function (err, rows) {
       //TODO the error part
@@ -214,7 +220,7 @@ app.get('/v1/clients', function(req, res){
 });
 
 app.get('/v1/clients/:clientid', function(req, res){
-  console.log(req.method+' request on '+req.originalUrl);
+  if(logging){console.log(req.method+' request on '+req.originalUrl)};
   db.serialize(function(){
     db.get("SELECT * FROM Clients WHERE ClientID=?",[req.params.clientid], function (err, row) {
       //TODO the error part
@@ -227,7 +233,7 @@ app.get('/v1/clients/:clientid', function(req, res){
 });
 
 app.get('/v1/jobs', function(req, res){
-  console.log(req.method+' request on '+req.originalUrl);
+  if(logging){console.log(req.method+' request on '+req.originalUrl)};
   db.serialize(function(){
     db.all("SELECT * FROM Jobs", function (err, rows) {
       //TODO the error part
@@ -240,7 +246,7 @@ app.get('/v1/jobs', function(req, res){
 });
 
 app.get('/v1/jobs/:jobid', function(req, res){
-  console.log(req.method+' request on '+req.originalUrl);
+  if(logging){console.log(req.method+' request on '+req.originalUrl)};
   db.serialize(function(){
     db.get("SELECT * FROM Jobs WHERE JobID=?",[req.params.jobid], function (err, row) {
       //TODO the error part
@@ -253,7 +259,7 @@ app.get('/v1/jobs/:jobid', function(req, res){
 });
 
 app.get('/v1/jobs/active', function(req, res){
-  console.log(req.method+' request on '+req.originalUrl);
+  if(logging){console.log(req.method+' request on '+req.originalUrl)};
   db.serialize(function(){
     db.all("SELECT * FROM Jobs WHERE Status=?",['active'], function (err, rows) {
       //TODO the error part
@@ -266,7 +272,7 @@ app.get('/v1/jobs/active', function(req, res){
 });
 
 app.get('/v1/activities', function(req, res){
-  console.log(req.method+' request on '+req.originalUrl);
+  if(logging){console.log(req.method+' request on '+req.originalUrl)};
   db.serialize(function(){
     db.all("SELECT * FROM activities",[], function (err, rows) {
       //TODO the error part
@@ -279,7 +285,7 @@ app.get('/v1/activities', function(req, res){
 });
 
 app.get('/v1/activities/:userid', function(req, res){
-  console.log(req.method+' request on '+req.originalUrl);
+  if(logging){console.log(req.method+' request on '+req.originalUrl)};
   db.serialize(function(){
     db.all("SELECT * FROM activities WHERE User=?",[req.params.userid], function (err, rows) {
       //TODO the error part
@@ -292,7 +298,7 @@ app.get('/v1/activities/:userid', function(req, res){
 });
 
 app.get('/v1/activities/:jobid', function(req, res){
-  console.log(req.method+' request on '+req.originalUrl);
+  if(logging){console.log(req.method+' request on '+req.originalUrl)};
   db.serialize(function(){
     db.all("SELECT * FROM activities WHERE Job=?",[req.params.jobid], function (err, rows) {
       //TODO the error part
@@ -305,7 +311,7 @@ app.get('/v1/activities/:jobid', function(req, res){
 });
 
 app.get('/v1/activities/:activityid', function(req, res){
-  console.log(req.method+' request on '+req.originalUrl);
+  if(logging){console.log(req.method+' request on '+req.originalUrl)};
   db.serialize(function(){
     db.get("SELECT * FROM activities WHERE ActivityID=?",[req.params.activityid], function (err, row) {
       //TODO the error part
@@ -321,7 +327,7 @@ app.get('/v1/activities/:activityid', function(req, res){
 
 //patch fucntions
 app.patch('/v1/users/:username', function(req, res){
-  console.log(req.method+' request on '+req.originalUrl);
+  if(logging){console.log(req.method+' request on '+req.originalUrl)};
   db.serialize(function() {
     db.run("UPDATE Users SET Password=? WHERE Username=?",[req.body.Password, req.params.username], function (err, row) {
       res.status(200).send({'success': req.params.username+' modified'});
@@ -330,7 +336,7 @@ app.patch('/v1/users/:username', function(req, res){
 });
 
 app.patch('/v1/clients/:clientid', function(req, res){
-  console.log(req.method+' request on '+req.originalUrl);
+  if(logging){console.log(req.method+' request on '+req.originalUrl)};
   db.serialize(function() {
     db.run("UPDATE Clients SET ClientName=? WHERE ClientID=?",[req.body.ClientName, req.params.clientid], function (err, row) {
       res.status(200).send({'success': req.params.clientid+' modified'});
@@ -339,7 +345,7 @@ app.patch('/v1/clients/:clientid', function(req, res){
 });
 
 app.patch('/v1/jobs/active/:jobid', function(req, res){
-  console.log(req.method+' request on '+req.originalUrl);
+  if(logging){console.log(req.method+' request on '+req.originalUrl)};
   db.serialize(function() {
     db.run("UPDATE Jobs SET Status=? WHERE JobID=?",['active', req.params.jobid], function (err, row) {
       res.status(200).send({'success': req.params.jobid+' modified'});
@@ -348,7 +354,7 @@ app.patch('/v1/jobs/active/:jobid', function(req, res){
 });
 
 app.patch('/v1/jobs/inactive/:jobid', function(req, res){
-  console.log(req.method+' request on '+req.originalUrl);
+  if(logging){console.log(req.method+' request on '+req.originalUrl)};
   db.serialize(function() {
     db.run("UPDATE Jobs SET Status=? WHERE JobID=?",['inactive', req.params.jobid], function (err, row) {
       res.status(200).send({'success': req.params.jobid+' modified'});
@@ -357,7 +363,7 @@ app.patch('/v1/jobs/inactive/:jobid', function(req, res){
 });
 
 app.patch('/v1/activities/addComment/:activityid', function(req, res){
-  console.log(req.method+' request on '+req.originalUrl);
+  if(logging){console.log(req.method+' request on '+req.originalUrl)};
   db.serialize(function() {
     db.run("UPDATE Activities SET Comment=? WHERE ActivityID=?",[ req.body.Comment , req.params.activityid], function (err, row) {
       res.status(200).send({'success': req.params.activityid+' modified'});
@@ -368,7 +374,7 @@ app.patch('/v1/activities/addComment/:activityid', function(req, res){
 
 //delete functions
 app.delete('/v1/users/:username', function(req, res){
-  console.log(req.method+' request on '+req.originalUrl);
+  if(logging){console.log(req.method+' request on '+req.originalUrl)};
   db.serialize(function() {
     db.run("DELETE FROM Users WHERE Username=?", [req.params.username], function(){
       res.status(200).send('Deleted User: '+req.params.username);
@@ -377,7 +383,7 @@ app.delete('/v1/users/:username', function(req, res){
 });
 
 app.delete('/v1/clients/:clientid', function(req, res){
-  console.log(req.method+' request on '+req.originalUrl);
+  if(logging){console.log(req.method+' request on '+req.originalUrl)};
   db.serialize(function() {
     db.run("DELETE FROM Clients WHERE ClientID=?", [req.params.clientid], function(){
       res.status(200).send('Deleted client: '+req.params.clientid);
@@ -386,7 +392,7 @@ app.delete('/v1/clients/:clientid', function(req, res){
 });
 
 app.delete('/v1/jobs/:jobid', function(req, res){
-  console.log(req.method+' request on '+req.originalUrl);
+  if(logging){console.log(req.method+' request on '+req.originalUrl)};
   db.serialize(function() {
     db.run("DELETE FROM Jobs WHERE JobID=?", [req.params.jobid], function(){
       res.status(200).send('Deleted Job: '+req.params.jobid);
@@ -395,7 +401,7 @@ app.delete('/v1/jobs/:jobid', function(req, res){
 });
 
 app.delete('/v1/activities/:activityid', function(req, res){
-  console.log(req.method+' request on '+req.originalUrl);
+  if(logging){console.log(req.method+' request on '+req.originalUrl)};
   db.serialize(function() {
     db.run("DELETE FROM Activities WHERE ActivityID=?", [req.params.activityid], function(){
       res.status(200).send('Deleted activity: '+req.params.activityid);
@@ -407,8 +413,14 @@ app.delete('/v1/activities/:activityid', function(req, res){
 
 //actual run area
 setup();
+module.exports = app;
 //temp code for deval perpuses
 //add a user
 // db.serialize(function(){
 //   db.run("INSERT INTO Users VALUES (?, ?, ?)", ['admin', 'supersecret', 'devUser']);
+// });
+// db.serialize(function() {
+//   db.run("INSERT INTO Users VALUES (?, ?, ?)", ['test', 'test', 'testUser'], function(){
+//     console.log('test user added');
+//   });
 // });
