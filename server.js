@@ -66,7 +66,7 @@ function createClientsTbl(){
 function createJobsTbl(){
   return "CREATE TABLE IF NOT EXISTS Jobs("+
          "JobID       TEXT PRIMARY KEY NOT NULL,"+
-         "Title       TEXT                        ,"+
+         "Title       TEXT                     ,"+
          "Client      TEXT             NOT NULL,"+
          "Status      TEXT             NOT NULL,"+
          "StartDate   TEXT             NOT NULL,"+
@@ -112,14 +112,24 @@ function badAuth(req){
 
 
 // routes
+app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
-//authentication
+app.post('/v1/login', function(req, res){
+  myAuthorizer(req.body.Username, req.body.Password, function(err, val){
+    if(val){
+      res.status(200).send({'login': 'success', 'User': req.body.Username});
+    }else{
+      res.status(401).send({'login': 'failed', 'User': req.body.Username});
+    }
+  });
+});
+
+//authentication for all urls below this point
 app.use(basicAuth({
   authorizer: myAuthorizer,                         //authentication function
    authorizeAsync: true,                            //authentication is asyn
   unauthorizedResponse: badAuth                     //if authentication function
 }));
-app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 //post fnctions
 app.post('/v1/users', function(req, res){
@@ -127,7 +137,7 @@ app.post('/v1/users', function(req, res){
   db.serialize(function() {
     db.run("INSERT INTO Users VALUES (?, ?, ?)", [req.body.Username, req.body.Password, req.body.Name], function(){
       res.set('Location', '/v1/users/'+req.body.Username);
-      res.status(201).send('User added: '+req.body.Username);
+      res.status(201).send('User created: '+req.body.Username);
     });
   });
 });
@@ -135,13 +145,32 @@ app.post('/v1/users', function(req, res){
 app.post('/v1/clients', function(req, res){
   console.log(req.method+' request on '+req.originalUrl);
   db.serialize(function() {
-    db.run("INSERT INTO Clients VALUES (?, ?)", [req.body.ClientID, req.body.ClientName], function(){
+    db.run("INSERT INTO Clients VALUES (?, ?)", [req.body.JobID, req.body.Title, ], function(){
       res.set('Location', '/v1/clients/'+req.body.ClientID);
-      res.status(201).send('client added: '+req.body.ClientName);
+      res.status(201).send('client created: '+req.body.ClientName);
     });
   });
 });
 
+app.post('/v1/jobs', function(req, res){
+  console.log(req.method+' request on '+req.originalUrl);
+  db.serialize(function() {
+    db.run("INSERT INTO Jobs VALUES (?, ?, ?, ?, ?, ?, ?)", [req.body.JobID, req.body.Title, req.body.Client, req.body.Status, req.body.StartDate, req.body.Description, req.body.InvNum], function(){
+      res.set('Location', '/v1/jobs/'+req.body.JobID);
+      res.status(201).send('Job created: '+req.body.JobID);
+    });
+  });
+});
+
+app.post('/v1/Activities', function(req, res){
+  console.log(req.method+' request on '+req.originalUrl);
+  db.serialize(function() {
+    db.run("INSERT INTO Jobs VALUES (?, ?, ?, ?, ?, ?, ?)", [req.body.ActivityID, req.body.Job, req.body.User, req.body.StartTime, req.body.EndTime, req.body.Time, req.body.Comment], function(){
+      res.set('Location', '/v1/activities/'+req.body.ActivityID);
+      res.status(201).send('Activity created: '+req.body.ActivityID);
+    });
+  });
+});
 
 
 //get functions
@@ -161,11 +190,11 @@ app.get('/v1/users', function(req, res){
 app.get('/v1/users/:username', function(req, res){
   console.log(req.method+' request on '+req.originalUrl);
   db.serialize(function(){
-    db.get("SELECT Username, Name FROM Users WHERE Username=?",[req.params.username], function (err, rows) {
+    db.get("SELECT Username, Name FROM Users WHERE Username=?",[req.params.username], function (err, row) {
       //TODO the error part
       if(err){res.status(400).send('error');}
       else{
-        if(rows){res.status(200).send(rows);}
+        if(row){res.status(200).send(row);}
         else {res.status(404).send({'error': 'resroce not found'});}}
     });
   });
@@ -187,11 +216,102 @@ app.get('/v1/clients', function(req, res){
 app.get('/v1/clients/:clientid', function(req, res){
   console.log(req.method+' request on '+req.originalUrl);
   db.serialize(function(){
-    db.get("SELECT * FROM Clients WHERE ClientID=?",[req.params.clientid], function (err, rows) {
+    db.get("SELECT * FROM Clients WHERE ClientID=?",[req.params.clientid], function (err, row) {
+      //TODO the error part
+      if(err){res.status(400).send('error');}
+      else{
+        if(row){res.status(200).send(row);}
+        else {res.status(404).send({'error': 'resroce not found'});}}
+    });
+  });
+});
+
+app.get('/v1/jobs', function(req, res){
+  console.log(req.method+' request on '+req.originalUrl);
+  db.serialize(function(){
+    db.all("SELECT * FROM Jobs", function (err, rows) {
       //TODO the error part
       if(err){res.status(400).send('error');}
       else{
         if(rows){res.status(200).send(rows);}
+        else {res.status(404).send({'error': 'resroce not found'});}}
+    });
+  });
+});
+
+app.get('/v1/jobs/:jobid', function(req, res){
+  console.log(req.method+' request on '+req.originalUrl);
+  db.serialize(function(){
+    db.get("SELECT * FROM Jobs WHERE JobID=?",[req.params.jobid], function (err, row) {
+      //TODO the error part
+      if(err){res.status(400).send('error');}
+      else{
+        if(rows){res.status(200).send(row);}
+        else {res.status(404).send({'error': 'resroce not found'});}}
+    });
+  });
+});
+
+app.get('/v1/jobs/active', function(req, res){
+  console.log(req.method+' request on '+req.originalUrl);
+  db.serialize(function(){
+    db.all("SELECT * FROM Jobs WHERE Status=?",['active'], function (err, rows) {
+      //TODO the error part
+      if(err){res.status(400).send('error');}
+      else{
+        if(rows){res.status(200).send(rows);}
+        else {res.status(404).send({'error': 'resroce not found'});}}
+    });
+  });
+});
+
+app.get('/v1/activities', function(req, res){
+  console.log(req.method+' request on '+req.originalUrl);
+  db.serialize(function(){
+    db.all("SELECT * FROM activities",[], function (err, rows) {
+      //TODO the error part
+      if(err){res.status(400).send('error');}
+      else{
+        if(rows){res.status(200).send(rows);}
+        else {res.status(404).send({'error': 'resroce not found'});}}
+    });
+  });
+});
+
+app.get('/v1/activities/:userid', function(req, res){
+  console.log(req.method+' request on '+req.originalUrl);
+  db.serialize(function(){
+    db.all("SELECT * FROM activities WHERE User=?",[req.params.userid], function (err, rows) {
+      //TODO the error part
+      if(err){res.status(400).send('error');}
+      else{
+        if(rows){res.status(200).send(rows);}
+        else {res.status(404).send({'error': 'resroce not found'});}}
+    });
+  });
+});
+
+app.get('/v1/activities/:jobid', function(req, res){
+  console.log(req.method+' request on '+req.originalUrl);
+  db.serialize(function(){
+    db.all("SELECT * FROM activities WHERE Job=?",[req.params.jobid], function (err, rows) {
+      //TODO the error part
+      if(err){res.status(400).send('error');}
+      else{
+        if(rows){res.status(200).send(rows);}
+        else {res.status(404).send({'error': 'resroce not found'});}}
+    });
+  });
+});
+
+app.get('/v1/activities/:activityid', function(req, res){
+  console.log(req.method+' request on '+req.originalUrl);
+  db.serialize(function(){
+    db.get("SELECT * FROM activities WHERE ActivityID=?",[req.params.activityid], function (err, row) {
+      //TODO the error part
+      if(err){res.status(400).send('error');}
+      else{
+        if(rows){res.status(200).send(row);}
         else {res.status(404).send({'error': 'resroce not found'});}}
     });
   });
@@ -218,6 +338,33 @@ app.patch('/v1/clients/:clientid', function(req, res){
   });
 });
 
+app.patch('/v1/jobs/active/:jobid', function(req, res){
+  console.log(req.method+' request on '+req.originalUrl);
+  db.serialize(function() {
+    db.run("UPDATE Jobs SET Status=? WHERE JobID=?",['active', req.params.jobid], function (err, row) {
+      res.status(200).send({'success': req.params.jobid+' modified'});
+      });
+  });
+});
+
+app.patch('/v1/jobs/inactive/:jobid', function(req, res){
+  console.log(req.method+' request on '+req.originalUrl);
+  db.serialize(function() {
+    db.run("UPDATE Jobs SET Status=? WHERE JobID=?",['inactive', req.params.jobid], function (err, row) {
+      res.status(200).send({'success': req.params.jobid+' modified'});
+      });
+  });
+});
+
+app.patch('/v1/activities/addComment/:activityid', function(req, res){
+  console.log(req.method+' request on '+req.originalUrl);
+  db.serialize(function() {
+    db.run("UPDATE Activities SET Comment=? WHERE ActivityID=?",[ req.body.Comment , req.params.activityid], function (err, row) {
+      res.status(200).send({'success': req.params.activityid+' modified'});
+      });
+  });
+});
+
 
 //delete functions
 app.delete('/v1/users/:username', function(req, res){
@@ -233,7 +380,25 @@ app.delete('/v1/clients/:clientid', function(req, res){
   console.log(req.method+' request on '+req.originalUrl);
   db.serialize(function() {
     db.run("DELETE FROM Clients WHERE ClientID=?", [req.params.clientid], function(){
-      res.status(200).send('Deleted client: '+req.params.username);
+      res.status(200).send('Deleted client: '+req.params.clientid);
+    });
+  });
+});
+
+app.delete('/v1/jobs/:jobid', function(req, res){
+  console.log(req.method+' request on '+req.originalUrl);
+  db.serialize(function() {
+    db.run("DELETE FROM Jobs WHERE JobID=?", [req.params.jobid], function(){
+      res.status(200).send('Deleted Job: '+req.params.jobid);
+    });
+  });
+});
+
+app.delete('/v1/activities/:activityid', function(req, res){
+  console.log(req.method+' request on '+req.originalUrl);
+  db.serialize(function() {
+    db.run("DELETE FROM Activities WHERE ActivityID=?", [req.params.activityid], function(){
+      res.status(200).send('Deleted activity: '+req.params.activityid);
     });
   });
 });
