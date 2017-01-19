@@ -19,6 +19,9 @@ var bodyParser = require('body-parser');
 //input validator
 var validator = require('validator');
 
+//get server ip
+var ip = require("node-ip");
+
 // functions of the server
 // function to setup the inital enviroment
 function setup(){

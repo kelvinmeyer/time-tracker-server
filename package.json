@@ -1,6 +1,6 @@
 {
   "name": "time-tracker-server",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "the server for my time tracking application",
   "scripts": {
     "start": "node server.js timeTrackV0.db true",
@@ -14,7 +14,8 @@
   "license": "ISC",
   "preferGlobal": true,
   "bin": {
-    "time-tracker-server": "./bin/time-tracker-server.js"
+    "time-tracker-server": "./bin/time-tracker-server.js",
+    "time-tracker-server-dev": "./bin/time-tracker-server-dev.js"
   },
   "bugs": {
     "url": "https://github.com/kelvinmeyer/time-tracker-server/issues"
@@ -24,6 +25,7 @@
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
     "express-basic-auth": "^0.2.3",
+    "node-ip": "^0.1.2",
     "shelljs": "^0.7.6",
     "sqlite3": "^3.1.8",
     "validator": "^6.2.1"
