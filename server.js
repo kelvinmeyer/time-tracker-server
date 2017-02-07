@@ -67,20 +67,20 @@ function createUsersTbl(){
 // function to create Clients TABLE ....2
 function createClientsTbl(){
   return "CREATE TABLE IF NOT EXISTS Clients("+
-         "ClientID   TEXT PRIMARY KEY NOT NULL,"+
-         "ClientName TEXT             NOT NULL);"
+         "ClientID   INTEGER PRIMARY KEY NOT NULL,"+
+         "ClientName TEXT                NOT NULL);"
 }
 
 // function to create Jobs TABLE ....3
 function createJobsTbl(){
   return "CREATE TABLE IF NOT EXISTS Jobs("+
-         "JobID       TEXT PRIMARY KEY NOT NULL,"+
-         "Title       TEXT                     ,"+
-         "Client      TEXT             NOT NULL,"+
-         "Status      TEXT             NOT NULL,"+
-         "StartDate   TEXT             NOT NULL,"+
-         "Description TEXT                     ,"+
-         "InvNum      TEXT                     ,"+
+         "JobID       INTEGER PRIMARY KEY NOT NULL,"+
+         "Title       TEXT                        ,"+
+         "Client      INTEGER             NOT NULL,"+
+         "Status      TEXT                NOT NULL,"+
+         "StartDate   TEXT                NOT NULL,"+
+         "Description TEXT                        ,"+
+         "InvNum      TEXT                        ,"+
          "FOREIGN KEY(Client) REFERENCES Clients(ClientID) ON DELETE NO ACTION ON UPDATE NO ACTION);"
 }
 
@@ -88,12 +88,12 @@ function createJobsTbl(){
 function createActivitiesTbl(){
   return "CREATE TABLE IF NOT EXISTS Activities("+
          "ActivityID TEXT PRIMARY KEY NOT NULL,"+
-         "Job        TEXT             NOT NULL,"+
-         "User       TEXT             NOT NULL,"+
-         "StartTime  INTEGER          NOT NULL,"+
-         "EndTime    INTEGER          NOT NULL,"+
-         "Time       INTEGER          NOT NULL,"+
-         "Comment    TEXT                     ,"+
+         "Job        INTEGER             NOT NULL,"+
+         "User       TEXT                NOT NULL,"+
+         "StartTime  INTEGER             NOT NULL,"+
+         "EndTime    INTEGER             NOT NULL,"+
+         "Time       INTEGER             NOT NULL,"+
+         "Comment    TEXT                        ,"+
          "FOREIGN KEY (Job) REFERENCES Jobs(JobID) ON DELETE NO ACTION ON UPDATE NO ACTION,"+
          "FOREIGN KEY (User) REFERENCES Users(Usersname) ON DELETE NO ACTION ON UPDATE NO ACTION);"
 }
@@ -117,13 +117,6 @@ function badAuth(req){
   console.log('BAD authentication');
   //TODO should return json with error and details
   return req.auth ? ('Credentials ' + req.auth.user + ':' + req.auth.password + ' rejected') : 'No credentials provided';
-}
-
-// functionn to produce next id number
-function nextId(id){
-  var num = id.slice(1);
-  num++;
-  return id.slice(0,1)+num;
 }
 
 // routes
@@ -179,9 +172,9 @@ app.post('/v1/clients', function(req, res){
     // get highest id
     db.get("SELECT ClientID FROM Clients ORDER BY ClientID DESC LIMIT 1;", function(err, row){
       if(!row){
-        var nextID = 'c0';
+        var nextID = 0;
       } else{
-        var nextID = nextId(row.ClientID);
+        var nextID = row.ClientID+1;
       }
       // check that propper data was submitted
       if(req.body.ClientName){
@@ -204,9 +197,9 @@ app.post('/v1/jobs', function(req, res){
     //get next id
     db.get("SELECT JobID FROM Jobs ORDER BY JobID DESC LIMIT 1;", function(err, row){
       if(!row){
-        var nextID = 'j0';
+        var nextID = 0;
       } else{
-        var nextID = nextId(row.JobID);
+        var nextID = row.JobID+1;
       }
     //check input data
     //step 1: validate refrences to other table
@@ -261,9 +254,9 @@ app.post('/v1/Activities', function(req, res){
     //get next id
     db.get("SELECT ActivityID FROM Activities ORDER BY ActivityID DESC LIMIT 1;", function(err, row){
       if(!row){
-        var nextID = 'a0';
+        var nextID = 0;
       } else{
-        var nextID = nextId(row.ActivityID);
+        var nextID = row.ActivityID+1;
       }
       //validate data
       //step 1: check referances
@@ -650,7 +643,7 @@ module.exports = app;       //for test purpuses
 //temp code for deval perpuses
 //add a user
 // db.serialize(function(){
-//   db.run("INSERT INTO Users VALUES (?, ?, ?)", ['temp', 'test', 'devUser']);
+//   db.run("INSERT INTO Users VALUES (?, ?, ?)", ['rot', 'toor', 'setupUser']);
 // });
 // // db.serialize(function() {
 //   db.run("INSERT INTO Users VALUES (?, ?, ?)", ['test', 'test', 'testUser'], function(){
