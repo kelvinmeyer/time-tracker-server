@@ -3,7 +3,7 @@ var sqlite3 = require('sqlite3').verbose();
 if(process.env.depsat == 'test'){
   var db = new sqlite3.Database('timeTrackV0Test.db');
 }else{
-  var db = new sqlite3.Database('timeTrackV0.db');
+  var db = new sqlite3.Database('timeTrackV1.db');
 }
 
 //express framework
@@ -90,9 +90,9 @@ function createActivitiesTbl(){
          "ActivityID TEXT PRIMARY KEY NOT NULL,"+
          "Job        TEXT             NOT NULL,"+
          "User       TEXT             NOT NULL,"+
-         "StartTime  TEXT             NOT NULL,"+
-         "EndTime    TEXT             NOT NULL,"+
-         "Time       TEXT             NOT NULL,"+
+         "StartTime  INTEGER          NOT NULL,"+
+         "EndTime    INTEGER          NOT NULL,"+
+         "Time       INTEGER          NOT NULL,"+
          "Comment    TEXT                     ,"+
          "FOREIGN KEY (Job) REFERENCES Jobs(JobID) ON DELETE NO ACTION ON UPDATE NO ACTION,"+
          "FOREIGN KEY (User) REFERENCES Users(Usersname) ON DELETE NO ACTION ON UPDATE NO ACTION);"
@@ -184,7 +184,7 @@ app.post('/v1/clients', function(req, res){
         var nextID = nextId(row.ClientID);
       }
       // check that propper data was submitted
-      if(req.body.ClientName && validator.isAlphanumeric(req.body.ClientName)){
+      if(req.body.ClientName){
         db.serialize(function() {
           db.run("INSERT INTO Clients VALUES (?, ?);", [nextID, validator.trim(req.body.ClientName)], function(){
             res.set('Location', '/v1/clients/'+nextID);
@@ -244,12 +244,12 @@ app.post('/v1/jobs', function(req, res){
               });
             });
           } else {
-            res.status(400).send({'Error': ''});
+            res.status(400).send({'Error': 'Client not found'});
           }
         });
       });
     } else {
-      res.status(400).send({'Error': ''});
+      res.status(400).send({'Error': 'Required data missing'});
     }
     });
   });
@@ -328,7 +328,7 @@ app.get('/v1/users/:username', function(req, res){
 app.get('/v1/clients', function(req, res){
   console.log(req.method+' request on '+req.originalUrl);
   db.serialize(function(){
-    db.all("SELECT * FROM Clients;", function (err, rows) {
+    db.all("SELECT * FROM Clients ORDER BY ClientName;", function (err, rows) {
       //TODO the error part
       if(err){res.status(400).send('error');}
       else{
@@ -430,6 +430,23 @@ app.get('/v1/activities/j/:jobid', function(req, res){
         else {res.status(404).send({'error': 'resroce not found'});}}
     });
   });
+});
+
+app.get('/v1/activities/t', function(req, res){
+  console.log(req.method+' request on '+req.originalUrl);
+  if(req.query.to && req.query.from){
+    db.serialize(function(){
+      db.all("SELECT * FROM activities WHERE StartTime > ? AND StartTime < ?", [req.query.from, req.query.to], function (err, rows) {
+        //TODO the error part
+        if(err){res.status(400).send('error'+err);}
+        else{
+          if(rows){res.status(200).send(rows);}
+          else {res.status(404).send({'error': 'resroce not found'});}}
+      });
+    });
+  } else{
+    res.status(400).send({'error': 'resroce not found 1'});
+  }
 });
 
 app.get('/v1/activities/:activityid', function(req, res){
@@ -620,9 +637,9 @@ module.exports = app;       //for test purpuses
 //temp code for deval perpuses
 //add a user
 // db.serialize(function(){
-//   db.run("INSERT INTO Users VALUES (?, ?, ?)", ['admin', 'supersecret', 'devUser']);
+//   db.run("INSERT INTO Users VALUES (?, ?, ?)", ['temp', 'test', 'devUser']);
 // });
-// db.serialize(function() {
+// // db.serialize(function() {
 //   db.run("INSERT INTO Users VALUES (?, ?, ?)", ['test', 'test', 'testUser'], function(){
 //     console.log('test user added');
 //   });

@@ -1,6 +1,6 @@
 {
   "name": "time-tracker-server",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "the server for my time tracking application",
   "scripts": {
     "start": "node server.js timeTrackV0.db true",
