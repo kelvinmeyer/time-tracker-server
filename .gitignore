@@ -1,5 +1,6 @@
 node_modules/
 timeTrackV0.db
 timeTrackV0Test.db
+timeTrackV1.db
 temp.js
 website/

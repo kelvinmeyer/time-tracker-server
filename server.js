@@ -380,6 +380,19 @@ app.get('/v1/jobs/active', function(req, res){
   });
 });
 
+app.get('/v1/jobs/inactive', function(req, res){
+  console.log(req.method+' request on '+req.originalUrl);
+  db.serialize(function(){
+    db.all("SELECT * FROM Jobs WHERE Status = 'False';", function (err, rows) {
+      //TODO the error part
+      if(err){res.status(400).send('error');}
+      else{
+        if(rows){res.status(200).send(rows);}
+        else {res.status(404).send({'error': 'resroce not found'});}}
+    });
+  });
+});
+
 app.get('/v1/jobs/:jobid', function(req, res){
   console.log(req.method+' request on '+req.originalUrl);
   db.serialize(function(){
