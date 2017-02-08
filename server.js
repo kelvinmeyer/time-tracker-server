@@ -641,9 +641,16 @@ app.delete('/v1/activities/:activityid', function(req, res){
 setup();
 module.exports = app;       //for test purpuses
 //temp code for deval perpuses
-//add a user
+//add a user if there are no users
 // db.serialize(function(){
-//   db.run("INSERT INTO Users VALUES (?, ?, ?)", ['rot', 'toor', 'setupUser']);
+//   db.all("SELECT Username FROM Users;", function (err, rows) {
+//     if(!rows.keys(obj).length){
+//       console.log(rows);
+//       db.serialize(function(){
+//         db.run("INSERT INTO Users VALUES (?, ?, ?)", ['rot', 'toor', 'setupUser']);
+//       });
+//     }
+//   });
 // });
 // // db.serialize(function() {
 //   db.run("INSERT INTO Users VALUES (?, ?, ?)", ['test', 'test', 'testUser'], function(){
