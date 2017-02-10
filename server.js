@@ -61,7 +61,7 @@ function createUsersTbl(){
   return "CREATE TABLE IF NOT EXISTS Users("+
          "Username TEXT PRIMARY KEY NOT NULL,"+
          "Password TEXT             NOT NULL,"+
-         "Name TEXT             NOT NULL);"
+         "Name     TEXT             NOT NULL);"
 }
 
 // function to create Clients TABLE ....2
@@ -87,7 +87,7 @@ function createJobsTbl(){
 // function to create Activities TABLE ....4
 function createActivitiesTbl(){
   return "CREATE TABLE IF NOT EXISTS Activities("+
-         "ActivityID TEXT PRIMARY KEY NOT NULL,"+
+         "ActivityID INTEGER PRIMARY KEY NOT NULL,"+
          "Job        INTEGER             NOT NULL,"+
          "User       TEXT                NOT NULL,"+
          "StartTime  INTEGER             NOT NULL,"+
@@ -652,8 +652,8 @@ module.exports = app;       //for test purpuses
 //     }
 //   });
 // });
-// // db.serialize(function() {
-//   db.run("INSERT INTO Users VALUES (?, ?, ?)", ['test', 'test', 'testUser'], function(){
+// db.serialize(function() {
+//   db.run("INSERT INTO Users VALUES (?, ?, ?)", ['root', 'toor', 'setupUser'], function(){
 //     console.log('test user added');
 //   });
 // });
