@@ -93,6 +93,7 @@ function createActivitiesTbl(){
          "StartTime  INTEGER             NOT NULL,"+
          "EndTime    INTEGER             NOT NULL,"+
          "Time       INTEGER             NOT NULL,"+
+         "TimeAdj    INTEGER             NOT NULL,"+
          "Comment    TEXT                        ,"+
          "FOREIGN KEY (Job) REFERENCES Jobs(JobID) ON DELETE NO ACTION ON UPDATE NO ACTION,"+
          "FOREIGN KEY (User) REFERENCES Users(Usersname) ON DELETE NO ACTION ON UPDATE NO ACTION);"
