@@ -569,14 +569,21 @@ app.patch('/v1/activities/:activityid', function(req, res){
   //cheack for activity
   db.serialize(function(){
     db.get("SELECT * FROM Activities WHERE ActivityID=?;",[req.params.activityid],function(err,row){
-      if(row && req.body.Comment){
+      if(row && req.body.Comment && req.body.TimeAdj){
         db.serialize(function() {
           //update the record
-          db.run("UPDATE Activities SET Comment=? WHERE ActivityID=?",[req.body.Comment, req.params.activityid], function (err, row) {
+          db.run("UPDATE Activities SET Comment=?, TimeAdj=? WHERE ActivityID=?",[req.body.Comment, req.body.TimeAdj, req.params.activityid], function (err, row) {
             res.status(200).send({'success': req.params.activityid+' modified'});
             });
         });
       } else if(row && req.body.TimeAdj){
+        db.serialize(function() {
+          //update the record
+          db.run("UPDATE Activities SET TimeAdj=? WHERE ActivityID=?",[req.body.TimeAdj, req.params.activityid], function (err, row) {
+            res.status(200).send({'success': req.params.activityid+' modified'});
+            });
+        });
+      } else if(row && req.body.Comment){
         db.serialize(function() {
           //update the record
           db.run("UPDATE Activities SET TimeAdj=? WHERE ActivityID=?",[req.body.TimeAdj, req.params.activityid], function (err, row) {
