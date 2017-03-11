@@ -1,4 +1,4 @@
-# time-tracker-server
+# Time Tracker Server
 This is the server component of my time tracking application.
 Interacting with this server is done through accessing exposed endpoints over http.
 
