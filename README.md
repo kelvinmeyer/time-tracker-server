@@ -2,6 +2,10 @@
 This is the server component of my time tracking application.
 Interacting with this server is done through accessing exposed endpoints over http.
 
+## Installation
+This server is avadable through npm with the following command
+npm i -g time-tracker-server
+
 ## Endpoints
 Most endpoints require basic http authentication to access.
 
