@@ -1,5 +1,5 @@
 # Time Tracker Server
-This is the server component of my time tracking application.
+This is the server component of my time tracking application. The server is written in nodejs with expressjs as the endpoint resolution component.
 Interacting with this server is done through accessing exposed endpoints over http.
 
 ## Installation
